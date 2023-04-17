@@ -50,16 +50,17 @@ class Incrementer extends React.Component {
 
     constructor (props) {
         super(props)
-        this.state = {n: props.start}
-        this.timer = null
+        this.state = {n: props.start, timer: null}
+        this.toggle = this.toggle.bind(this)
+        this.reset = this.reset.bind(this)
     }
 
     componentDidMount () {
-        window.setInterval(this.increment.bind(this), 1000) 
+        this.play()
     }
 
-    componentWillUnmount () {
-        window.clearInterval(this.timer)
+    componentWillUnmount (e) {
+        window.clearInterval(this.state.timer)
     }
 
     increment () {
@@ -68,9 +69,39 @@ class Incrementer extends React.Component {
         })
     }
 
+    pause () {
+        window.clearInterval(this.state.timer)
+        this.setState({
+            timer : null
+        })
+    }
+
+    play () {
+        window.clearInterval(this.state.timer)
+        this.setState({
+            timer : window.setInterval(this.increment.bind(this), 1000)
+        })
+    }
+
+    toggle () {
+        return this.state.timer ? this.pause() : this.play()
+    }
+
+    label () {
+        return this.state.timer ? 'Pause' : 'Lecture'
+    }
+
+    reset () {
+        this.pause()
+        this.play()
+        this.setState((state, props) =>({n : props.start}))
+    }
+
     render () {
         return <div>
-            {this.state.n}
+            Valeur : {this.state.n}
+            <button onClick={this.toggle}>{this.label()}</button>
+            <button onClick={this.reset}>Réinitialiser</button>
         </div>
     }
 
@@ -81,13 +112,30 @@ Incrementer.defaultProps = {
     step : 1
 }
 
+class ManualIncrementer extends React.Component {
+
+    constructor (props) {
+        super(props)
+        this.state = {n: 0}
+    }
+
+    increment (e) {
+        e.preventDefault
+        this.setState(function (state, props) {
+            return {n : state.n + 1}            
+        })
+    }
+
+    render () {
+        return <div>Valeur : {this.state.n} <button onClick={this.increment.bind(this)}>Incrémenter</button></div>
+    }
+}
+
 function Home () {
     return <div>
         <Welcome name="Dorothée" />
         <Welcome name="Jean" />
-        <Clock/>
-        <Incrementer start={10}/>
-        <Incrementer start={100} step={10}/>
+        <Incrementer/>
     </div>
 }
 
